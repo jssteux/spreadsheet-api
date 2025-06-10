@@ -40,6 +40,6 @@ Write-Host "`n✓ All services are running!" -ForegroundColor Green
 Write-Host "`nAccess points:" -ForegroundColor Yellow
 Write-Host "  API: http://localhost:8080" -ForegroundColor White
 Write-Host "  PostgreSQL: localhost:5432" -ForegroundColor White
-Write-Host "  PgAdmin: http://localhost:5050" -ForegroundColor White
+Write-Host "  PgAdmin: http://localhost:80" -ForegroundColor White
 Write-Host "`nView logs:" -ForegroundColor Yellow
 Write-Host "  docker logs spreadsheet-api -f" -ForegroundColor White

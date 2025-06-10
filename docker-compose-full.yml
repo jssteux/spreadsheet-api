@@ -19,6 +19,22 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+      
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: spreadsheet-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "80:80"
+    depends_on:
+      - postgres
+    networks:
+      - spreadsheet-network      
 
   api:
     build:

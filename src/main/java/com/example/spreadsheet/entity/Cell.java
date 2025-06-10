@@ -21,7 +21,7 @@ public class Cell {
     @Column(name = "column_index", nullable = false)
     private Integer columnIndex;
     
-    @Column(name = "cell_value", columnDefinition = "CLOB")
+    @Column(name = "cell_value", columnDefinition = "TEXT")
     private String value;
     
     public Long getId() { return id; }

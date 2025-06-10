@@ -1,0 +1,57 @@
+﻿version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: spreadsheet-postgres
+    environment:
+      POSTGRES_DB: spreadsheet_db
+      POSTGRES_USER: spreadsheet_user
+      POSTGRES_PASSWORD: spreadsheet_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - spreadsheet-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spreadsheet_user -d spreadsheet_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spreadsheet-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/spreadsheet_db
+      SPRING_DATASOURCE_USERNAME: spreadsheet_user
+      SPRING_DATASOURCE_PASSWORD: spreadsheet_pass
+      # Force proper PostgreSQL dialect
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQL10Dialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_LOB_NON_CONTEXTUAL_CREATION: "true"
+      # Application settings
+      JWT_SECRET: ThisIsASecretKeyForJWTTokenGenerationPleaseChangeInProduction2023
+      MEDIA_UPLOAD_PATH: /app/uploads
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - spreadsheet-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  spreadsheet-network:
+    driver: bridge

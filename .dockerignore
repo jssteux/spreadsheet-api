@@ -1,0 +1,17 @@
+﻿target/
+!target/*.jar
+.idea/
+*.iml
+.git/
+.gitignore
+*.md
+.mvn/
+mvnw*
+docker-compose*.yml
+Dockerfile
+.dockerignore
+*.ps1
+*.bat
+db-scripts/
+uploads/*
+!uploads/.gitkeep

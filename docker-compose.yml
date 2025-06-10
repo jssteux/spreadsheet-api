@@ -1,0 +1,38 @@
+﻿version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: spreadsheet-postgres
+    environment:
+      POSTGRES_DB: spreadsheet_db
+      POSTGRES_USER: spreadsheet_user
+      POSTGRES_PASSWORD: spreadsheet_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - spreadsheet-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: spreadsheet-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - spreadsheet-network
+
+volumes:
+  postgres_data:
+
+networks:
+  spreadsheet-network:
+    driver: bridge

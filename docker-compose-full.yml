@@ -57,8 +57,10 @@ services:
       # Application settings
       JWT_SECRET: ThisIsASecretKeyForJWTTokenGenerationPleaseChangeInProduction2023
       MEDIA_UPLOAD_PATH: /app/uploads
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     ports:
       - "8080:8080"
+      - "5005:5005"  # Port de débogage
     volumes:
       - ./uploads:/app/uploads
     networks:

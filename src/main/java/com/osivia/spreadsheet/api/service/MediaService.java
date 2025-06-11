@@ -42,7 +42,11 @@ public class MediaService {
     
     @Autowired
     private SpreadsheetService spreadsheetService;
-    
+
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
+
+
     public Media uploadMedia(Long spreadsheetId, MultipartFile file, String username) throws IOException {
         Spreadsheet spreadsheet = spreadsheetRepository.findById(spreadsheetId)
             .orElseThrow(() -> new ResourceNotFoundException("Spreadsheet not found"));
@@ -84,7 +88,6 @@ public class MediaService {
         media.setFilename(originalFilename);
         media.setContentType(file.getContentType());
         media.setFileSize(file.getSize());
-        media.setFilePath(filePath.toString());
         media.setSpreadsheet(spreadsheet);
         
         return mediaRepository.save(media);
@@ -104,8 +107,9 @@ public class MediaService {
                 .findBySpreadsheetAndUser(spreadsheet, user)
                 .orElseThrow(() -> new UnauthorizedException("No permission to access this media"));
         }
-        
-        Path filePath = Paths.get(media.getFilePath());
+
+        Path targetPath = Paths.get(uploadDir, media.getFilename());
+        Path filePath = Paths.get(targetPath.toUri());
         Resource resource = new UrlResource(filePath.toUri());
         
         if (!resource.exists() || !resource.isReadable()) {
@@ -135,7 +139,9 @@ public class MediaService {
         }
         
         // Delete file
-        Path filePath = Paths.get(media.getFilePath());
+        Path targetPath = Paths.get(uploadDir, media.getFilename());
+        Path filePath = Paths.get(targetPath.toUri());
+
         Files.deleteIfExists(filePath);
         
         // Delete entity

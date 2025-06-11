@@ -184,7 +184,7 @@ public class ZipExportImportService {
 
         try {
             // Debug : lister le contenu du ZIP
-            debugZipContent(zipFile.getInputStream());
+            //debugZipContent(zipFile.getInputStream());
 
             // Extraire le ZIP
             extractZip(zipFile.getInputStream(), tempDir);

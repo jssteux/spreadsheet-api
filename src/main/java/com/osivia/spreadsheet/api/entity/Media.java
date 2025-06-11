@@ -19,9 +19,7 @@ public class Media {
     @Column(name = "file_size")
     private Long fileSize;
     
-    @Column(name = "file_path", nullable = false)
-    private String filePath;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "spreadsheet_id", nullable = false)
     private Spreadsheet spreadsheet;
@@ -47,9 +45,7 @@ public class Media {
     public Long getFileSize() { return fileSize; }
     public void setFileSize(Long fileSize) { this.fileSize = fileSize; }
     
-    public String getFilePath() { return filePath; }
-    public void setFilePath(String filePath) { this.filePath = filePath; }
-    
+
     public Spreadsheet getSpreadsheet() { return spreadsheet; }
     public void setSpreadsheet(Spreadsheet spreadsheet) { this.spreadsheet = spreadsheet; }
     

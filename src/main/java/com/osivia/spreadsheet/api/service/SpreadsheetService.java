@@ -108,7 +108,7 @@ public class SpreadsheetService {
         
         // Delete associated media files
         for (Media media : spreadsheet.getMediaFiles()) {
-            deleteMediaFile(media.getFilePath());
+            deleteMediaFile(media.getFilename());
         }
         
         spreadsheetRepository.delete(spreadsheet);

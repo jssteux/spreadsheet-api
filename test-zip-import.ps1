@@ -33,9 +33,12 @@ function Create-SampleZipWithMedia {
     New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
     try {
-        # Create sample CSV file
-        $csvPath = Join-Path $tempDir "sample-spreadsheet.csv"
-        Write-Host "  Creating sample CSV file..." -ForegroundColor Gray
+        # Create sheets directory
+        $sheetsDir = New-Item -ItemType Directory -Path (Join-Path $tempDir "sheets") -Force
+
+        # Create sample CSV file in sheets directory
+        $csvPath = Join-Path $sheetsDir "sample-spreadsheet.csv"
+        Write-Host "  Creating sample CSV file in sheets directory..." -ForegroundColor Gray
 
         $csvContent = @"
 Name,Category,Price,Quantity
@@ -139,12 +142,13 @@ Purpose: Testing media file import functionality
 
         Write-Host "`n✓ Created sample ZIP file: $ZipFileName ($sizeMB MB)" -ForegroundColor Green
         Write-Host "  Full path: $ZipFileName" -ForegroundColor Gray
-        Write-Host "  Contents:" -ForegroundColor Gray
-        Write-Host "    - 1 CSV file (sample-spreadsheet.csv)" -ForegroundColor Gray
-        Write-Host "    - 2 Media files:" -ForegroundColor Gray
-        Write-Host "      • sample-image.png (image)" -ForegroundColor Gray
-        Write-Host "      • readme.txt (document)" -ForegroundColor Gray
-        Write-Host "    - metadata.json (import configuration)" -ForegroundColor Gray
+        Write-Host "  Structure:" -ForegroundColor Gray
+        Write-Host "    /metadata.json" -ForegroundColor Gray
+        Write-Host "    /sheets/" -ForegroundColor Gray
+        Write-Host "      - sample-spreadsheet.csv" -ForegroundColor Gray
+        Write-Host "    /media/" -ForegroundColor Gray
+        Write-Host "      - sample-image.png" -ForegroundColor Gray
+        Write-Host "      - readme.txt" -ForegroundColor Gray
 
         return $ZipFileName
 

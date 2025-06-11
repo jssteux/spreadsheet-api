@@ -48,7 +48,7 @@ The application creates two default users on startup:
 
 ```bash
 # Register new user
-POST /api/auth/register
+POST /auth/register
 {
   "username": "newuser",
   "email": "user@example.com",
@@ -56,7 +56,7 @@ POST /api/auth/register
 }
 
 # Login
-POST /api/auth/login
+POST /auth/login
 {
   "username": "admin",
   "password": "admin123"

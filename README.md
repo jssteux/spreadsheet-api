@@ -33,11 +33,8 @@ A Spring Boot REST API for spreadsheet management with Google Sheets-like functi
    ```
 
 3. Access the application:
-   - API Base URL: `http://localhost:8080/api`
-   - H2 Console: `http://localhost:8080/api/h2-console`
-     - JDBC URL: `jdbc:h2:mem:spreadsheetdb`
-     - Username: `sa`
-     - Password: (leave empty)
+   - API Base URL: `http://localhost:8080`
+
 
 ### Default Users
 
@@ -70,7 +67,7 @@ POST /api/auth/login
 
 ```bash
 # Create spreadsheet
-POST /api/spreadsheets
+POST /spreadsheets
 Authorization: Bearer {token}
 {
   "name": "My Spreadsheet",
@@ -78,23 +75,23 @@ Authorization: Bearer {token}
 }
 
 # Get spreadsheet
-GET /api/spreadsheets/{id}
+GET /spreadsheets/{id}
 Authorization: Bearer {token}
 
 # List user spreadsheets
-GET /api/spreadsheets
+GET /spreadsheets
 Authorization: Bearer {token}
 
 # Delete spreadsheet
-DELETE /api/spreadsheets/{id}
+DELETE /spreadsheets/{id}
 Authorization: Bearer {token}
 
 # Export to Excel
-GET /api/spreadsheets/{id}/export
+GET /spreadsheets/{id}/export
 Authorization: Bearer {token}
 
 # Import from Excel
-POST /api/spreadsheets/import
+POST /spreadsheets/import
 Authorization: Bearer {token}
 Content-Type: multipart/form-data
 file: {excel_file}
@@ -104,18 +101,18 @@ file: {excel_file}
 
 ```bash
 # Create sheet
-POST /api/sheets/spreadsheet/{spreadsheetId}
+POST /sheets/spreadsheet/{spreadsheetId}
 Authorization: Bearer {token}
 {
   "name": "Sheet2"
 }
 
 # Get sheet with cells
-GET /api/sheets/{id}
+GET /sheets/{id}
 Authorization: Bearer {token}
 
 # Update cells
-PUT /api/sheets/{id}/cells
+PUT /sheets/{id}/cells
 Authorization: Bearer {token}
 {
   "cells": [
@@ -130,7 +127,7 @@ Authorization: Bearer {token}
 
 ```bash
 # Grant permission
-POST /api/spreadsheets/{id}/permissions
+POST /spreadsheets/{id}/permissions
 Authorization: Bearer {token}
 {
   "username": "testuser",
@@ -138,7 +135,7 @@ Authorization: Bearer {token}
 }
 
 # Revoke permission
-DELETE /api/spreadsheets/{id}/permissions/{username}
+DELETE /spreadsheets/{id}/permissions/{username}
 Authorization: Bearer {token}
 ```
 
@@ -146,17 +143,17 @@ Authorization: Bearer {token}
 
 ```bash
 # Upload media
-POST /api/media/spreadsheet/{spreadsheetId}
+POST /media/spreadsheet/{spreadsheetId}
 Authorization: Bearer {token}
 Content-Type: multipart/form-data
 file: {media_file}
 
 # Download media
-GET /api/media/{id}/download
+GET /media/{id}/download
 Authorization: Bearer {token}
 
 # Delete media
-DELETE /api/media/{id}
+DELETE /media/{id}
 Authorization: Bearer {token}
 ```
 
@@ -164,7 +161,7 @@ Authorization: Bearer {token}
 
 ### Insert a column with multiple rows
 ```bash
-PUT /api/sheets/{sheetId}/cells
+PUT /sheets/{sheetId}/cells
 Authorization: Bearer {token}
 {
   "cells": [
@@ -178,7 +175,7 @@ Authorization: Bearer {token}
 
 ### Update multiple columns at once
 ```bash
-PUT /api/sheets/{sheetId}/cells
+PUT /sheets/{sheetId}/cells
 Authorization: Bearer {token}
 {
   "cells": [
@@ -249,7 +246,7 @@ The API returns consistent error responses:
   "status": 404,
   "error": "Not Found",
   "message": "Spreadsheet not found",
-  "path": "/api/spreadsheets/999"
+  "path": "/spreadsheets/999"
 }
 ```
 

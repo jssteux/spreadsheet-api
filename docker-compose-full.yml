@@ -31,6 +31,9 @@ services:
       PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
     ports:
       - "80:80"
+    volumes:
+      # Persist pgAdmin configuration and storage
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
     networks:
@@ -51,7 +54,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: spreadsheet_pass
       # Force proper PostgreSQL dialect
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQL10Dialect
-      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
       SPRING_JPA_SHOW_SQL: "true"
       SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_LOB_NON_CONTEXTUAL_CREATION: "true"
       # Application settings
@@ -69,6 +71,9 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
 
 networks:
   spreadsheet-network:

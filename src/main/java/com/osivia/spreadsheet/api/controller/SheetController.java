@@ -1,10 +1,7 @@
 package com.osivia.spreadsheet.api.controller;
 
 
-import com.osivia.spreadsheet.api.dto.CellUpdateRequest;
-import com.osivia.spreadsheet.api.dto.CreateSheetRequest;
-import com.osivia.spreadsheet.api.dto.MessageResponse;
-import com.osivia.spreadsheet.api.dto.SheetDTO;
+import com.osivia.spreadsheet.api.dto.*;
 import com.osivia.spreadsheet.api.service.SpreadsheetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,5 +47,64 @@ public class SheetController {
             Principal principal) {
         spreadsheetService.updateCells(id, request.getCells(), principal.getName());
         return ResponseEntity.ok(new MessageResponse("Cells updated successfully"));
+    }
+
+    @PutMapping("/{id}/rows/{rowIndex}")
+    public ResponseEntity<MessageResponse> updateRow(
+            @PathVariable Long id,
+            @PathVariable Integer rowIndex,
+            @Valid @RequestBody RowUpdateRequest request,
+            Principal principal) {
+        spreadsheetService.updateRow(id, rowIndex, request.getValues(), principal.getName());
+        return ResponseEntity.ok(new MessageResponse("Row updated successfully"));
+    }
+
+    @PostMapping("/{id}/rows")
+    public ResponseEntity<MessageResponse> appendRow(
+            @PathVariable Long id,
+            @Valid @RequestBody RowUpdateRequest request,
+            Principal principal) {
+        Integer newRowIndex = spreadsheetService.appendRow(id, request.getValues(), principal.getName());
+        return ResponseEntity.ok(new MessageResponse("Row appended at index " + newRowIndex));
+    }
+
+    @DeleteMapping("/{id}/rows")
+    public ResponseEntity<MessageResponse> deleteRows(
+            @PathVariable Long id,
+            @RequestParam Integer startRow,
+            @RequestParam(defaultValue = "1") Integer count,
+            Principal principal) {
+        spreadsheetService.deleteRows(id, startRow, count, principal.getName());
+        return ResponseEntity.ok(new MessageResponse(count + " row(s) deleted successfully"));
+    }
+
+    @DeleteMapping("/{id}/rows/{rowIndex}")
+    public ResponseEntity<MessageResponse> deleteRow(
+            @PathVariable Long id,
+            @PathVariable Integer rowIndex,
+            Principal principal) {
+        spreadsheetService.deleteRows(id, rowIndex, 1, principal.getName());
+        return ResponseEntity.ok(new MessageResponse("Row deleted successfully"));
+    }
+
+    // NEW ENDPOINT FOR COLUMN OPERATIONS
+
+    @PostMapping("/{id}/columns/{columnIndex}")
+    public ResponseEntity<MessageResponse> insertColumn(
+            @PathVariable Long id,
+            @PathVariable Integer columnIndex,
+            @Valid @RequestBody ColumnInsertRequest request,
+            Principal principal) {
+        spreadsheetService.insertColumn(id, columnIndex, request.getValues(), principal.getName());
+        return ResponseEntity.ok(new MessageResponse("Column inserted successfully"));
+    }
+
+    @DeleteMapping("/{id}/columns/{columnIndex}")
+    public ResponseEntity<MessageResponse> deleteColumn(
+            @PathVariable Long id,
+            @PathVariable Integer columnIndex,
+            Principal principal) {
+        spreadsheetService.deleteColumn(id, columnIndex, principal.getName());
+        return ResponseEntity.ok(new MessageResponse("Column deleted successfully"));
     }
 }

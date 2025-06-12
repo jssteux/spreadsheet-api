@@ -345,11 +345,7 @@ public class SpreadsheetService {
         if (spreadsheet.getOwner().getUsername().equals(username)) {
             dto.setUserPermission("OWNER");
         } else {
-            User user = userRepository.findByUsername(username).orElse(null);
-            if (user != null) {
-                permissionRepository.findBySpreadsheetAndUser(spreadsheet, user)
-                    .ifPresent(p -> dto.setUserPermission(p.getPermissionType().toString()));
-            }
+            userRepository.findByUsername(username).flatMap(user -> permissionRepository.findBySpreadsheetAndUser(spreadsheet, user)).ifPresent(p -> dto.setUserPermission(p.getPermissionType().toString()));
         }
         
         return dto;
@@ -381,6 +377,136 @@ public class SpreadsheetService {
         } catch (IOException e) {
             // Log error but don't fail the operation
             System.err.println("Failed to delete file: " + filePath);
+        }
+    }
+
+    /**
+     * Updates an entire row with the provided values
+     */
+    public void updateRow(Long sheetId, Integer rowIndex, List<String> values, String username) {
+        Sheet sheet = sheetRepository.findById(sheetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sheet not found"));
+
+        checkPermission(sheet.getSpreadsheet(), username, PermissionType.EDIT);
+
+        // Clear existing cells in the row
+        List<Cell> existingCells = cellRepository.findBySheetAndRowIndex(sheet, rowIndex);
+        cellRepository.deleteAll(existingCells);
+
+        // Insert new values
+        for (int col = 0; col < values.size(); col++) {
+            String value = values.get(col);
+            if (value != null && !value.trim().isEmpty()) {
+                Cell cell = new Cell();
+                cell.setSheet(sheet);
+                cell.setRowIndex(rowIndex);
+                cell.setColumnIndex(col);
+                cell.setValue(value.trim());
+                cellRepository.save(cell);
+            }
+        }
+    }
+
+    /**
+     * Appends a new row at the end of the sheet
+     */
+    public Integer appendRow(Long sheetId, List<String> values, String username) {
+        Sheet sheet = sheetRepository.findById(sheetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sheet not found"));
+
+        checkPermission(sheet.getSpreadsheet(), username, PermissionType.EDIT);
+
+        // Find the next available row index
+        Integer maxRowIndex = cellRepository.findMaxRowIndexBySheet(sheet);
+        Integer newRowIndex = (maxRowIndex != null) ? maxRowIndex + 1 : 0;
+
+        // Insert values
+        for (int col = 0; col < values.size(); col++) {
+            String value = values.get(col);
+            if (value != null && !value.trim().isEmpty()) {
+                Cell cell = new Cell();
+                cell.setSheet(sheet);
+                cell.setRowIndex(newRowIndex);
+                cell.setColumnIndex(col);
+                cell.setValue(value.trim());
+                cellRepository.save(cell);
+            }
+        }
+
+        return newRowIndex;
+    }
+
+    /**
+     * Deletes one or more consecutive rows
+     */
+    public void deleteRows(Long sheetId, Integer startRow, Integer count, String username) {
+        Sheet sheet = sheetRepository.findById(sheetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sheet not found"));
+
+        checkPermission(sheet.getSpreadsheet(), username, PermissionType.EDIT);
+
+        // Delete cells in the specified rows
+        for (int i = 0; i < count; i++) {
+            List<Cell> cellsToDelete = cellRepository.findBySheetAndRowIndex(sheet, startRow + i);
+            cellRepository.deleteAll(cellsToDelete);
+        }
+
+        // Shift remaining rows up
+        List<Cell> cellsToShift = cellRepository.findBySheetAndRowIndexGreaterThan(sheet, startRow + count - 1);
+        for (Cell cell : cellsToShift) {
+            cell.setRowIndex(cell.getRowIndex() - count);
+            cellRepository.save(cell);
+        }
+    }
+
+    /**
+     * Inserts a new column at the specified position
+     */
+    public void insertColumn(Long sheetId, Integer columnIndex, List<String> values, String username) {
+        Sheet sheet = sheetRepository.findById(sheetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sheet not found"));
+
+        checkPermission(sheet.getSpreadsheet(), username, PermissionType.EDIT);
+
+        // Shift existing columns to the right
+        List<Cell> cellsToShift = cellRepository.findBySheetAndColumnIndexGreaterThanEqual(sheet, columnIndex);
+        for (Cell cell : cellsToShift) {
+            cell.setColumnIndex(cell.getColumnIndex() + 1);
+            cellRepository.save(cell);
+        }
+
+        // Insert new column values
+        for (int row = 0; row < values.size(); row++) {
+            String value = values.get(row);
+            if (value != null && !value.trim().isEmpty()) {
+                Cell cell = new Cell();
+                cell.setSheet(sheet);
+                cell.setRowIndex(row);
+                cell.setColumnIndex(columnIndex);
+                cell.setValue(value.trim());
+                cellRepository.save(cell);
+            }
+        }
+    }
+
+    /**
+     * Deletes a column and shifts remaining columns left
+     */
+    public void deleteColumn(Long sheetId, Integer columnIndex, String username) {
+        Sheet sheet = sheetRepository.findById(sheetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sheet not found"));
+
+        checkPermission(sheet.getSpreadsheet(), username, PermissionType.EDIT);
+
+        // Delete cells in the specified column
+        List<Cell> cellsToDelete = cellRepository.findBySheetAndColumnIndex(sheet, columnIndex);
+        cellRepository.deleteAll(cellsToDelete);
+
+        // Shift remaining columns to the left
+        List<Cell> cellsToShift = cellRepository.findBySheetAndColumnIndexGreaterThan(sheet, columnIndex);
+        for (Cell cell : cellsToShift) {
+            cell.setColumnIndex(cell.getColumnIndex() - 1);
+            cellRepository.save(cell);
         }
     }
 }

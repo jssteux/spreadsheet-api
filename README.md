@@ -221,7 +221,7 @@ The application uses H2 in-memory database by default. No configuration needed.
 
 ```
 spreadsheet-api/
-├── src/main/java/com/example/spreadsheet/
+├── src/main/java/com/osivia/spreadsheet/api
 │   ├── controller/      # REST controllers
 │   ├── dto/            # Data transfer objects
 │   ├── entity/         # JPA entities

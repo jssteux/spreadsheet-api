@@ -437,6 +437,40 @@ public class SpreadsheetService {
     }
 
     /**
+     * Appends a new row at the end of the sheet
+     */
+    public int appendMultipleRows(Long sheetId, List<List<String>> rows, String username) {
+        Sheet sheet = sheetRepository.findById(sheetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sheet not found"));
+
+        checkPermission(sheet.getSpreadsheet(), username, PermissionType.EDIT);
+
+        // Find the next available row index
+        Integer maxRowIndex = cellRepository.findMaxRowIndexBySheet(sheet);
+        Integer startRowIndex = (maxRowIndex != null) ? maxRowIndex + 1 : 0;
+
+        int appendedCount = 0;
+
+        for (List<String> rowValues : rows) {
+            // Insert values for this row
+            for (int col = 0; col < rowValues.size(); col++) {
+                String value = rowValues.get(col);
+                if (value != null && !value.trim().isEmpty()) {
+                    Cell cell = new Cell();
+                    cell.setSheet(sheet);
+                    cell.setRowIndex(startRowIndex + appendedCount);
+                    cell.setColumnIndex(col);
+                    cell.setValue(value.trim());
+                    cellRepository.save(cell);
+                }
+            }
+            appendedCount++;
+        }
+
+        return appendedCount;
+    }
+
+    /**
      * Deletes one or more consecutive rows
      */
     public void deleteRows(Long sheetId, Integer startRow, Integer count, String username) {
@@ -509,4 +543,59 @@ public class SpreadsheetService {
             cellRepository.save(cell);
         }
     }
+
+    /**
+     * Delete a sheet by ID
+     * @param sheetId The ID of the sheet to delete
+     * @param username The username of the user performing the operation
+     */
+    public void deleteSheet(Long sheetId, String username) {
+        Sheet sheet = sheetRepository.findById(sheetId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sheet not found"));
+
+        checkPermission(sheet.getSpreadsheet(), username, PermissionType.EDIT);
+
+        // Check if this is the last sheet in the spreadsheet
+        Spreadsheet spreadsheet = sheet.getSpreadsheet();
+        if (spreadsheet.getSheets().size() <= 1) {
+            throw new IllegalStateException("Cannot delete the last sheet in a spreadsheet");
+        }
+
+        // Delete all cells in this sheet first
+        List<Cell> sheetCells = cellRepository.findBySheet(sheet);
+        if (!sheetCells.isEmpty()) {
+            cellRepository.deleteAll(sheetCells);
+        }
+
+        // Remove sheet from spreadsheet's sheets collection
+        spreadsheet.getSheets().remove(sheet);
+
+        // Update order indices for remaining sheets
+        updateSheetOrderIndices(spreadsheet);
+
+        // Delete the sheet
+        sheetRepository.delete(sheet);
+
+        // Save the updated spreadsheet
+        spreadsheetRepository.save(spreadsheet);
+    }
+
+    /**
+     * Update order indices for sheets after deletion
+     * @param spreadsheet The spreadsheet containing the sheets
+     */
+    private void updateSheetOrderIndices(Spreadsheet spreadsheet) {
+        List<Sheet> remainingSheets = spreadsheet.getSheets();
+
+        // Sort by current order index
+        remainingSheets.sort((a, b) -> Integer.compare(a.getOrderIndex(), b.getOrderIndex()));
+
+        // Update order indices to be sequential
+        for (int i = 0; i < remainingSheets.size(); i++) {
+            remainingSheets.get(i).setOrderIndex(i);
+            sheetRepository.save(remainingSheets.get(i));
+        }
+    }
+
+
 }

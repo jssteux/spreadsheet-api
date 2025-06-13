@@ -218,6 +218,7 @@ public class ZipExportImportService {
                     .forEach(path -> System.out.println("  " + tempDir.relativize(path)));
 
             if (Files.exists(sheetsDir)) {
+                int order =0;
                 for (SheetMetadata sheetMeta : metadata.sheets) {
                     Path csvPath = sheetsDir.resolve(sheetMeta.filename);
                     System.out.println("Looking for CSV: " + csvPath);
@@ -226,6 +227,7 @@ public class ZipExportImportService {
                         Sheet sheet = new Sheet();
                         sheet.setName(sheetMeta.name);
                         sheet.setSpreadsheet(spreadsheet);
+                        sheet.setOrderIndex( order++);
                         sheet = sheetRepository.save(sheet);
 
                         // Lire le CSV et créer les cellules

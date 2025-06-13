@@ -87,7 +87,15 @@ public class SheetController {
         return ResponseEntity.ok(new MessageResponse("Row deleted successfully"));
     }
 
-    // NEW ENDPOINT FOR COLUMN OPERATIONS
+
+    @PostMapping("/{id}/rows/multiple")
+    public ResponseEntity<MessageResponse> appendMultipleRows(
+            @PathVariable Long id,
+            @Valid @RequestBody MultipleRowsRequest request,
+            Principal principal) {
+        int appendedCount = spreadsheetService.appendMultipleRows(id, request.getRows(), principal.getName());
+        return ResponseEntity.ok(new MessageResponse("Successfully appended " + appendedCount + " rows"));
+    }
 
     @PostMapping("/{id}/columns/{columnIndex}")
     public ResponseEntity<MessageResponse> insertColumn(
@@ -107,4 +115,13 @@ public class SheetController {
         spreadsheetService.deleteColumn(id, columnIndex, principal.getName());
         return ResponseEntity.ok(new MessageResponse("Column deleted successfully"));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSheet(
+            @PathVariable Long id,
+            Principal principal) {
+        spreadsheetService.deleteSheet(id, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
+
 }

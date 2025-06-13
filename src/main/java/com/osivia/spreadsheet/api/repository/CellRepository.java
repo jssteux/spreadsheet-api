@@ -51,4 +51,5 @@ public interface CellRepository extends JpaRepository<Cell, Long> {
     @Query("SELECT MAX(c.rowIndex) FROM Cell c WHERE c.sheet = :sheet")
     Integer findMaxRowIndexBySheet(@Param("sheet") Sheet sheet);
 
+    List<Cell> findBySheet(Sheet sheet);
 }

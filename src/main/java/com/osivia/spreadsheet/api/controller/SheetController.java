@@ -16,9 +16,13 @@ import java.security.Principal;
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class SheetController {
     
-    @Autowired
-    private SpreadsheetService spreadsheetService;
-    
+
+    private final SpreadsheetService spreadsheetService;
+
+    public SheetController(SpreadsheetService spreadsheetService) {
+        this.spreadsheetService = spreadsheetService;
+    }
+
     @PostMapping("/spreadsheet/{spreadsheetId}")
     public ResponseEntity<SheetDTO> createSheet(
             @PathVariable Long spreadsheetId,

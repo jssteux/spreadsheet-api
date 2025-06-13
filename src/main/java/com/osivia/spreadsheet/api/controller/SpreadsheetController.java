@@ -8,7 +8,6 @@ import com.osivia.spreadsheet.api.dto.SpreadsheetDTO;
 import com.osivia.spreadsheet.api.entity.Spreadsheet;
 import com.osivia.spreadsheet.api.service.SpreadsheetService;
 import com.osivia.spreadsheet.api.service.ZipExportImportService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
@@ -24,18 +22,25 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/spreadsheets")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class SpreadsheetController {
-    
-    @Autowired
-    private SpreadsheetService spreadsheetService;
 
-    @Autowired
-    private ZipExportImportService zipService;
-    
+
+    public SpreadsheetController(SpreadsheetService spreadsheetService, ZipExportImportService zipService) {
+        this.spreadsheetService = spreadsheetService;
+        this.zipService = zipService;
+    }
+
+
+    private final SpreadsheetService spreadsheetService;
+
+
+    private final ZipExportImportService zipService;
+
     @PostMapping
     public ResponseEntity<SpreadsheetDTO> createSpreadsheet(
             @Valid @RequestBody CreateSpreadsheetRequest request,
@@ -149,13 +154,13 @@ public class SpreadsheetController {
     @PostMapping("/import/zip")
     public ResponseEntity<?> importFromZip(
             @RequestParam("file") MultipartFile file,
-            HttpServletRequest request, Principal principal) {
+            Principal principal) {
 
         try {
             // Vérifier que c'est bien un fichier ZIP
-            if (!file.getContentType().equals("application/zip") &&
-                    !file.getContentType().equals("application/x-zip-compressed") &&
-                    !file.getOriginalFilename().toLowerCase().endsWith(".zip")) {
+            if (!"application/zip".equals(file.getContentType()) &&
+                    !"application/x-zip-compressed".equals(file.getContentType()) &&
+                    !Objects.requireNonNull(file.getOriginalFilename()).toLowerCase().endsWith(".zip")) {
 
                 Map<String, String> error = new HashMap<>();
                 error.put("error", "File must be a ZIP archive");

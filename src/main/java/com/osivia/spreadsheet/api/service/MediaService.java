@@ -31,20 +31,23 @@ public class MediaService {
     @Value("${media.upload.path}")
     private String uploadPath;
     
-    @Autowired
-    private MediaRepository mediaRepository;
+    private final MediaRepository mediaRepository;
     
-    @Autowired
-    private SpreadsheetRepository spreadsheetRepository;
+    private final SpreadsheetRepository spreadsheetRepository;
     
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
     
-    @Autowired
-    private SpreadsheetService spreadsheetService;
+    private final SpreadsheetService spreadsheetService;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
+
+    public MediaService(MediaRepository mediaRepository, SpreadsheetRepository spreadsheetRepository, UserRepository userRepository, SpreadsheetService spreadsheetService) {
+        this.mediaRepository = mediaRepository;
+        this.spreadsheetRepository = spreadsheetRepository;
+        this.userRepository = userRepository;
+        this.spreadsheetService = spreadsheetService;
+    }
 
 
     public Media uploadMedia(Long spreadsheetId, MultipartFile file, String username) throws IOException {

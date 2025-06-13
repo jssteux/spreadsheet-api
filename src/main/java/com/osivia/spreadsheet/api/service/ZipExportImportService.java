@@ -7,8 +7,6 @@ import com.osivia.spreadsheet.api.repository.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,31 +16,40 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Stream;
 import java.util.zip.*;
-import java.util.stream.Collectors;
+
 
 @Service
 public class ZipExportImportService {
 
-    @Autowired
-    private SpreadsheetRepository spreadsheetRepository;
 
-    @Autowired
-    private SheetRepository sheetRepository;
+    private final SpreadsheetRepository spreadsheetRepository;
 
-    @Autowired
-    private CellRepository cellRepository;
 
-    @Autowired
-    private MediaRepository mediaRepository;
+    private final  SheetRepository sheetRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+
+    private final  CellRepository cellRepository;
+
+
+    private final  MediaRepository mediaRepository;
+
+
+    private final  UserRepository userRepository;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public ZipExportImportService(SpreadsheetRepository spreadsheetRepository, SheetRepository sheetRepository, CellRepository cellRepository, MediaRepository mediaRepository, UserRepository userRepository) {
+        this.spreadsheetRepository = spreadsheetRepository;
+        this.sheetRepository = sheetRepository;
+        this.cellRepository = cellRepository;
+        this.mediaRepository = mediaRepository;
+        this.userRepository = userRepository;
+    }
 
     // DTO pour metadata.json (sans les données des cellules)
     public static class SpreadsheetMetadata {
@@ -126,9 +133,6 @@ public class ZipExportImportService {
         return baos.toByteArray();
     }
 
-    /**
-     * Écrit les données d'un sheet au format CSV
-     */
 
     /**
      * Écrit les données d'un sheet au format CSV (version simple sans OpenCSV)
@@ -212,10 +216,6 @@ public class ZipExportImportService {
             // Créer les sheets depuis les fichiers CSV
             Path sheetsDir = tempDir.resolve("sheets");
 
-            // Debug : afficher le contenu du répertoire temporaire
-            System.out.println("Temp dir contents:");
-            Files.walk(tempDir)
-                    .forEach(path -> System.out.println("  " + tempDir.relativize(path)));
 
             if (Files.exists(sheetsDir)) {
                 int order =0;
@@ -362,15 +362,17 @@ public class ZipExportImportService {
      */
     private void deleteDirectory(Path dir) throws IOException {
         if (Files.exists(dir)) {
-            Files.walk(dir)
-                    .sorted(Comparator.reverseOrder())
-                    .forEach(path -> {
-                        try {
-                            Files.delete(path);
-                        } catch (IOException e) {
-                            // Log error but continue
-                        }
-                    });
+            try (Stream<Path> paths = Files.walk(dir)) {
+                paths.sorted(Comparator.reverseOrder())
+                        .forEach(path -> {
+                            try {
+                                Files.delete(path);
+                            } catch (IOException e) {
+                                // Log error but continue
+                                System.err.println("Failed to delete: " + path + " - " + e.getMessage());
+                            }
+                        });
+            }
         }
     }
 }

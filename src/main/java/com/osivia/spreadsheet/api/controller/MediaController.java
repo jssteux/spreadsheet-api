@@ -3,7 +3,6 @@ package com.osivia.spreadsheet.api.controller;
 import com.osivia.spreadsheet.api.dto.MessageResponse;
 import com.osivia.spreadsheet.api.entity.Media;
 import com.osivia.spreadsheet.api.service.MediaService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,9 +20,13 @@ import java.security.Principal;
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class MediaController {
     
-    @Autowired
-    private MediaService mediaService;
-    
+
+    private final MediaService mediaService;
+
+    public MediaController(MediaService mediaService) {
+        this.mediaService = mediaService;
+    }
+
     @PostMapping("/spreadsheet/{spreadsheetId}")
     public ResponseEntity<Media> uploadMedia(
             @PathVariable Long spreadsheetId,

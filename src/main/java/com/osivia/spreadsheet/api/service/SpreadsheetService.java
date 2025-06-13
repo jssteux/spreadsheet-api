@@ -32,27 +32,29 @@ import java.util.stream.Collectors;
 @Transactional
 public class SpreadsheetService {
     
-    @Autowired
-    private SpreadsheetRepository spreadsheetRepository;
+
+    private final  SpreadsheetRepository spreadsheetRepository;
+
+    private final  SheetRepository sheetRepository;
     
-    @Autowired
-    private SheetRepository sheetRepository;
+    private final  CellRepository cellRepository;
+
+    private final  UserRepository userRepository;
     
-    @Autowired
-    private CellRepository cellRepository;
+    private final  SpreadsheetPermissionRepository permissionRepository;
     
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private SpreadsheetPermissionRepository permissionRepository;
-    
-    @Autowired
-    private MediaRepository mediaRepository;
-    
+
     @Value("${media.upload.path}")
     private String uploadPath;
-    
+
+    public SpreadsheetService(SpreadsheetRepository spreadsheetRepository, SheetRepository sheetRepository, CellRepository cellRepository, UserRepository userRepository, SpreadsheetPermissionRepository permissionRepository, MediaRepository mediaRepository) {
+        this.spreadsheetRepository = spreadsheetRepository;
+        this.sheetRepository = sheetRepository;
+        this.cellRepository = cellRepository;
+        this.userRepository = userRepository;
+        this.permissionRepository = permissionRepository;
+    }
+
     public SpreadsheetDTO createSpreadsheet(String name, String description, String username) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -447,7 +449,7 @@ public class SpreadsheetService {
 
         // Find the next available row index
         Integer maxRowIndex = cellRepository.findMaxRowIndexBySheet(sheet);
-        Integer startRowIndex = (maxRowIndex != null) ? maxRowIndex + 1 : 0;
+        int startRowIndex = (maxRowIndex != null) ? maxRowIndex + 1 : 0;
 
         int appendedCount = 0;
 

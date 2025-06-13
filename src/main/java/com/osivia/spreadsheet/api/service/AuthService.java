@@ -8,7 +8,6 @@ import com.osivia.spreadsheet.api.dto.RegisterRequest;
 import com.osivia.spreadsheet.api.entity.User;
 import com.osivia.spreadsheet.api.repository.UserRepository;
 import com.osivia.spreadsheet.api.security.JwtUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,18 +18,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
     
-    @Autowired
-    private AuthenticationManager authenticationManager;
+
+    private final  AuthenticationManager authenticationManager;
+
+
+    private final UserRepository userRepository;
     
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    
-    @Autowired
-    private JwtUtils jwtUtils;
-    
+    private final  PasswordEncoder passwordEncoder;
+
+    private final JwtUtils jwtUtils;
+
+    public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
+    }
+
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
